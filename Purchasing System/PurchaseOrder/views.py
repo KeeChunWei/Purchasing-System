@@ -14,7 +14,6 @@ from datetime import datetime
 from app.models import Person,Item,Vendor
 from Quotation.models import Quotation, QuotationItem
 from PurchaseOrder.models import PurchaseOrder,PurchaseOrderItem
-from prettytable import PrettyTable
 
 from django.views.generic import TemplateView
 from django.core.exceptions import ObjectDoesNotExist
@@ -22,6 +21,7 @@ from django.http.request import QueryDict
 from decimal import Decimal
 import random
 import datetime 
+from prettytable import PrettyTable
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
@@ -29,16 +29,22 @@ from django.conf import settings
 
 @login_required
 def purchaseorderform(request):
+    quotation = Quotation.objects.all()
+    print(quotation.values_list('quotation_id', flat=True))
+
     context = {
             'title':'Purchase Order Form',
-            'year':'2019/2020'
+            'quotation': quotation
         }
-
+    
     return render(request,'PurchaseOrder/purchaseorderform.html',context)
 
 
 @login_required
 def fillingpurchaseorder(request):
+
+    quotation = Quotation.objects.all()
+    print(quotation.values_list('quotation_id', flat=True))
 
     context = {}
     quo_id = request.GET['quo_id']
@@ -56,8 +62,10 @@ def fillingpurchaseorder(request):
         purchaseorder = PurchaseOrder.objects.get(quotation_id = quo_id)
         print(purchaseorder)
 
-        context = { 'error': 'The purchase order is already Issued! Purchase Order Number: ' + purchaseorder.purchase_order_id,
-                    'title': 'Purchase Order Form'
+        context = { 'error': 'The purchase order is already Issued!',
+                    'error_message': 'Quotation ID: ' + quo_id + ' Purchase Order Number: ' + purchaseorder.purchase_order_id,
+                   'title': 'Purchase Order Form',
+                    'quotation': quotation
             }
         return render(request,'PurchaseOrder/purchaseorderform.html',context)
 
@@ -72,7 +80,9 @@ def fillingpurchaseorder(request):
                     'quotation_id': quo_id, 
                     'staff' : staff,
                     'vendor_id': quotations.vendor_id.vendor_id,
-                    'rows':item_list
+                    'rows':item_list,
+                    'quotation': quotation,
+                    'selected_quotation_id': request.GET['quo_id']
                 }
 
             responsesItems = render(request,'PurchaseOrder/purchaseorderform.html',context).content
@@ -81,22 +91,34 @@ def fillingpurchaseorder(request):
         except Quotation.DoesNotExist:
 
             context = { 'error': 'The quotation id is invalid !',
-                        'title': 'Purchase Order Form'
+                        'title': 'Purchase Order Form',
+                        'quotation': quotation,
+                        'selected_quotation_id': quo_id
                 }
             return render(request,'PurchaseOrder/purchaseorderform.html',context)
 
 def purchaseorderconfirmation(request):
+    quotation = Quotation.objects.all()
+    print(quotation.values_list('quotation_id', flat=True))
 
-    context = {}
-    po_id = request.POST['purchase_order_id']
-    quotation_id = request.POST['quotation_id']
-    staff_id = request.user.id 
-    staff = Person.objects.get(user_id = staff_id)
-    vendor_id = request.POST['vendor_id']
-    shipping_inst = request.POST['shipping_inst']
-    description = request.POST['description']
-    vendor_info = Vendor.objects.get(vendor_id = vendor_id)
-    
+    try:
+        context = {}
+        po_id = request.POST['purchase_order_id']
+        quotation_id = request.POST['quotation_id']
+        staff_id = request.user.id 
+        staff = Person.objects.get(user_id = staff_id)
+        vendor_id = request.POST['vendor_id']
+        shipping_inst = request.POST['shipping_inst']
+        description = request.POST['description']
+        vendor_info = Vendor.objects.get(vendor_id = vendor_id)
+
+    except ObjectDoesNotExist:
+        context = { 'error': 'The purchase order id is invalid !',
+                        'title': 'Purchase Order Form',
+                        'quotation': quotation
+                }
+        return render(request,'PurchaseOrder/purchaseorderform.html',context)
+
     #extract information from item table
     responses = request.read()
     print(responses)
@@ -134,7 +156,9 @@ def purchaseorderconfirmation(request):
         i = i + 1
         grand_total = grand_total + total
     print(items)
-       
+
+
+
 
     context = {
             'title': 'Purchase Order Confirmation',
@@ -146,7 +170,8 @@ def purchaseorderconfirmation(request):
             'rows' : items,
             'staff' : staff,
             'vendor_info' : vendor_info,
-            'description' : description
+            'description' : description,
+            'quotation': quotation
         }
 
 
@@ -204,7 +229,8 @@ def purchaseorderdetails(request):
         i = i + 1
         grand_total = grand_total + total
     print(items)
-     
+
+ 
 
     # push the Purchase Order data to the database 
     current_time = datetime.datetime.now() 
@@ -282,8 +308,7 @@ def purchaseorderhistorydetails(request):
             'vendor_info' : purchase_order.vendor_id,
             'grand_total': purchase_order.total_price,
             'time_created': purchase_order.time_created,
-            'description' : purchase_order.description,
-            'year':'2019/2020'
+            'description' : purchase_order.description
         }
   
     return render(request,'PurchaseOrder/purchaseorderhistorydetails.html',context)
@@ -294,8 +319,6 @@ def purchaseorderhistory(request):
 
     context = {
             'title':'Purchase Order History',
-            'rows':purchase_orders,
-            'year':'2019/2020'
+            'rows':purchase_orders
         }
-
     return render(request,'PurchaseOrder/purchaseorderhistory.html',context)
