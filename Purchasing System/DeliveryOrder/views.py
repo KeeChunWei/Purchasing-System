@@ -41,7 +41,7 @@ def fillingdeliveryorder(request):
     user_id = request.user.id
     staff = Person.objects.get(user_id = user_id)
 
-    try: 
+    try:
         po = PurchaseOrder.objects.get(purchase_order_id = pur_id)
         item_list = PurchaseOrderItem.objects.filter(purchase_order_id = pur_id)
         context = {
@@ -55,7 +55,7 @@ def fillingdeliveryorder(request):
 
         return render(request,'DeliveryOrder/deliveryorderform.html',context)
 
-    except PurchaseOrder.DoesNotExist:
+    except PurchaseOrder.ObjectDoesNotExist:
 
         context = { 'error': 'The quotation id is invalid !',
                     'title': 'Delivery Order Form'
