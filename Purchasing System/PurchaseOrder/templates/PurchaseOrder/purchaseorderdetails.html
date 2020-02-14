@@ -8,7 +8,7 @@
             <label class="labelpodetails fontlabel">Time Created: </label>
             <label>{{time_created}}</label>
         </div>
-    <form class="purchaseordersubmission margintop" action="menu" method="POST">
+    <form class="purchaseordersubmission row flex-column" action="menu" method="POST">
      {% csrf_token %}
         <div class="row">
            <div class="col">
@@ -28,7 +28,7 @@
               <textarea type="text" class="infobox" name="vendor_info"  readonly>{{vendor_info.vendor_name}} &#13;&#10;{{vendor_info.vendor_address}} &#13;&#10;{{vendor_info.vendor_phone_number}}</textarea>
             </div>
         </div>
-        <div class="row margintop">
+        <div class="row row flex-column">
             <div class="col">
                 <label class="labelpodetails fontlabel">Shipping Instructions</label>
                <textarea class="form-control potextarea" name="shipping_inst" id="shipping_inst" placeholder="Shipping Instructions (If applicable)" readonly >{{shipping_inst}}</textarea>
@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <table class="table table-striped margintop">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th scope="col" class="fontlabel">Item ID</th>
@@ -71,7 +71,7 @@
               </tr>
           </tfoot>
         </table>
-        <div class="margintop">
+        <div class="">
             <button type="submit" class="btn btn-info buttonsize">Close</button>
         </div>
 

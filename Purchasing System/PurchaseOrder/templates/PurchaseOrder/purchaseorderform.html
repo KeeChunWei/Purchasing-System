@@ -1,48 +1,91 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
-<div class="formpurchaseorder margintop" >
+<div class="formpurchaseorder" >
     <form class="quotationfind" action="fillingpurchaseorder" method="get">
+<div class="formpurchaseorder margintop" >
 
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" name="quo_id" id="quo_id" placeholder="Quotation ID" aria-label="Quotation ID"
-            aria-describedby="button-addon2">
-          <div class="input-group-append">
-           <button type="submit" class="btn btn-outline-info btn-hover btn-rounded waves-effect">Find</button>
-          </div>
+    <script>
+        $(document).on('click', '.dropdown-menu li a', function () {
+            $('#quo_id').val($(this).html().trim());
+            $('#submitBtn').click();
+        }); 
+    </script>
+
+    <form class="quotationfind" action="fillingpurchaseorder" method="get">
+        <div class="row" style="margin-top: 20px">
+            <div class="col-lg-6">
+            <label class="form-label">Select A Quotation ID</label><br />
+                <div class="input-group">
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Quotation ID <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            {% for quotation in quotation %}
+                            <li class="dropdown-item bg-white"><a >
+                                {{ quotation.quotation_id }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div style="display: none">
+                        <input readonly value="{{selected_quotation_id}}" type="text" class="form-control" name="quo_id" id="quo_id" placeholder="Quotation ID" aria-label="Quotation ID"
+                    aria-describedby="button-addon2">
+                    </div>
+                    
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-6 -->
+        </div><!-- /.row -->
+
+        <div class="input-group mb-3" style="display: none">  
+            <div class="input-group-append">
+                <button id="submitBtn" type="submit" class="btn btn-outline-info btn-hover btn-rounded waves-effect">Find</button>
+            </div>
         </div>
-
-
     </form>
-    <p>{{error}}</p>
-
+    <p style="color: red">{{error}}</p>
+    <p style="color: red">{{error_message}}</p>
     <form class="purchaseordersubmission" action="purchaseorderconfirmation" method="POST">
         {% csrf_token %}
-        <div class="row margintop">
+
+        <div class="margintop row flex-column">
+
             <div class="col">
-                <input type="text" class="form-control" name="purchase_order_id" value="{{purchase_order_id}}" placeholder="Purchase Order ID">
+                <label class="form-label"> Purchase order ID</label><br />
+                <input readonly type="text" class="form-control" name="purchase_order_id" value="{{purchase_order_id}}" required placeholder="Purchase Order ID">
             </div>
             <div class="col">
-                <textarea type="text" class="poform-control" name="quotation_id" placeholder="Quotation ID" readonly>{{quotation_id}}</textarea>
+                <label class="form-label"> Quotation ID</label><br />
+                <textarea type="text" class="form-control" name="quotation_id" placeholder="Quotation ID" required readonly>{{quotation_id}}</textarea>
             </div>
             <div class="col">
-                <textarea type="text" class="poform-control" name="staff_id" placeholder="Staff ID" readonly>{{staff.person_id}}</textarea>
+                <label class="form-label"> Staff ID</label><br />
+                <textarea type="text" class="form-control" name="staff_id" placeholder="Staff ID" required readonly>{{staff.person_id}}</textarea>
             </div>
             <div class="col">
-                <textarea type="text" class="poform-control" name="vendor_id" placeholder="Vendor ID" readonly>{{vendor_id}}</textarea>
+                <label class="form-label"> Vendor ID</label><br />
+                <textarea type="text" class="form-control" name="vendor_id" placeholder="Vendor ID" required readonly>{{vendor_id}}</textarea>
             </div>
         </div>
 
-        <div class="row margintop">
+
+
+        <div class="margintop row flex-column">
+
             <div class="col">
+                <label class="form-label"> Shipping</label><br />
                 <textarea type="text" class="form-control" name="shipping_inst" id="shipping_inst" placeholder="Shipping Instructions (If applicable)"></textarea>
             </div>
             <div class="col">
+                <label class="form-label"> Description</label><br />
                 <textarea type="text" class="form-control" name="description" id="description" placeholder="Purchase Order Description (If applicable)"></textarea>
+                <br>
             </div>
         </div>
 
-        <table class="table table-striped margintop" name="items" id="items">
+        <table class="table table-striped" name="items" id="items">
             <thead>
                 <tr>
                     <th scope="col" class="fontlabel">Item ID</th>
@@ -55,16 +98,16 @@
             <tbody name="item_rows" >
                 {% for r in rows %}
                 <tr>
-                    <td><input type="text" class="form-control" name="item_id" value="{{r.item_id}}" readonly></td>
-                    <td><input type="text" class="form-control" name="item_name" value="{{r.item_id.item_name}}" readonly></td>
-                    <td><input type="text" class="form-control" name="quantity" value="{{r.quantity}}"placeholder="Quantity Item"></td>
-                    <td><input type="text" class="form-control" name="unit_price" value="{{r.unit_price}}" readonly></td>
-                    <td><input type="text" class="form-control" name="total_price" value="{{r.total_price}}" readonly></td>
+                    <td><input type="text" class="form-control" name="item_id" value="{{r.item_id}}" readonly required></td>
+                    <td><input type="text" class="form-control" name="item_name" value="{{r.item_id.item_name}}" readonly required></td>
+                    <td><input type="text" class="form-control" name="quantity" value="{{r.quantity}}"required placeholder="Quantity Item"></td>
+                    <td><input type="text" class="form-control" name="unit_price" value="{{r.unit_price}}" required readonly></td>
+                    <td><input type="text" class="form-control" name="total_price" value="{{r.total_price}}" readonly required></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <div class="margintop">
+        <div>
             <button type="submit" class="btn btn-success btn-square buttonsize">Submit</button>
             <a class="btn btn-danger btn-square buttonsize" href="/menu">Cancel</a>
         </div>
