@@ -55,7 +55,7 @@ def fillinginvoice(request):
         responsesItems = render(request,'Invoice/invoiceform.html',context).content
         return render(request,'Invoice/invoiceform.html',context)
 
-    except Invoice.DoesNotExist:
+    except PurchaseOrder.DoesNotExist: # PurchaseOrder change from invoice to avoid noinvoice error
 
         context = { 'error': 'The invoice id is invalid !',
                     'title': 'Invoice Form'
@@ -134,7 +134,8 @@ def invoicedetails(request):
     staff_id = request.POST['staff_id']
     vendor_id = request.POST['vendor_id']
     description = request.POST['description']
-    purchaseorder = get_object_or_404(PurchaseOrder)
+    purchaseorder = get_object_or_404(PurchaseOrder.objects.filter(purchase_order_id = purchase_order_id)) # second changes
+    #before :purchaseorder = get_object_or_404(PurchaseOrder)
     staff_info = Person.objects.get(person_id = staff_id)
     vendor_info = Vendor.objects.get(vendor_id = vendor_id)
 
